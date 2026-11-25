@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Matriz temática RITP</title>
+<link rel="stylesheet" href="../estilo.css">
+<link rel="stylesheet" href="../nav.css">
+<style>
+/* barra y pie alineados con el ancho del contenido (1384 px) */
+.sn, .sp { --sn-pad: max(28px, calc((100vw - 1384px) / 2)); }
+</style>
+<style>
+/* Página «Temas de RITP»: la matriz de similitud ocupa la placa izquierda; a la derecha, el artículo elegido y la
+   lista de temas. Colores y letra vienen de estilo.css (tinta azul marino, rampa índigo, colores de parte comunes). */
+:root {
+  --bg: var(--fondo); --plate: var(--papel); --ink: var(--tinta); --ink2: var(--suave); --mut: var(--tenue);
+  --rule: var(--linea); --hi: var(--resalte);
+  --adm: var(--p-adm); --tec: var(--p-tec); --eco: var(--p-eco); --anx: var(--p-anx);
+}
+* { box-sizing: border-box; min-width: 0; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--ink); font: 16px/1.5 var(--fuente); overflow-x: clip; }
+
+.band { padding: 24px 28px; }
+.wrap { max-width: 1384px; margin: 0 auto; }
+header.band .wrap { border-bottom: 1px solid var(--rule); }
+h1 { margin: 0 0 6px; font-size: 28px; line-height: 1.15; font-weight: 700; letter-spacing: -.01em; text-wrap: balance; }
+.lede { margin: 0; padding-bottom: 12px; max-width: 110ch; color: var(--ink2); font-size: 14px; }
+h2 { margin: 0 0 8px; font-size: 17px; font-weight: 600; letter-spacing: -.01em; }
+.muted { color: var(--ink2); font-size: 14px; }
+
+/* columnas: matriz | panel */
+.main { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 20px; align-items: start; }
+.plate { background: var(--plate); border: 1px solid var(--rule); border-radius: 8px; padding: 16px; }
+
+/* controles */
+.ctl { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 22px; margin-bottom: 12px; }
+input[type=search] {
+  width: 240px; min-height: 44px; padding: 8px 12px;
+  font: inherit; font-size: 16px; color: var(--ink);
+  background: var(--plate); border: 1px solid var(--rule); border-radius: 8px;
+}
+button {
+  min-height: 40px; padding: 8px 12px; cursor: pointer;
+  font: inherit; font-size: 14px; color: var(--ink);
+  background: var(--plate); border: 1px solid var(--rule); border-radius: 999px;
+}
+button:hover { border-color: var(--ink); }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; }
+#volver[hidden] { display: none; }
+
+/* figura */
+.fig { position: relative; touch-action: manipulation; }
+#cv { display: block; width: 100%; cursor: crosshair; }
+#tip {
+  position: absolute; z-index: 2; display: none; pointer-events: none; max-width: 300px;
+  padding: 8px 10px; font-size: 13px; line-height: 1.4;
+  background: var(--plate); border: 1px solid var(--rule); border-radius: 8px;
+  box-shadow: 0 2px 10px rgb(0 0 0 / .12);
+}
+#tip b { font-variant-numeric: tabular-nums; }
+
+/* leyenda */
+.legend { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 26px; margin-top: 12px; font-size: 13px; color: var(--ink2); }
+.ramp { display: flex; align-items: center; gap: 8px; }
+.ramp i { display: block; width: 150px; height: 10px; border-radius: 2px;
+  background: linear-gradient(90deg, #eef0fb, #c8ccee, #979edc, #525dbf, #2b3586, #141a3f); }
+.sw { display: inline-block; width: 10px; height: 10px; margin-right: 6px; border-radius: 2px; vertical-align: -1px; }
+#err { color: #d03b3b; }
+
+/* panel lateral */
+aside {
+  display: grid; gap: 16px;
+  position: sticky; top: calc(var(--sn-h, 48px) + 12px);
+  max-height: calc(100vh - var(--sn-h, 48px) - 24px); overflow: auto;
+}
+#sel p { margin: 6px 0; font-size: 14px; }
+#sel .x { padding-left: 10px; border-left: 2px solid var(--rule); color: var(--ink2); font-size: 13px; line-height: 1.5; }
+.lst { margin: 0; padding: 0; list-style: none; }
+.lst li { border-top: 1px solid var(--rule); }
+.lst button {
+  display: flex; align-items: baseline; gap: 10px; width: 100%; min-height: 36px; padding: 6px 2px;
+  text-align: left; border: 0; border-radius: 0;
+}
+.lst .n { flex: none; margin-left: auto; color: var(--ink2); font-size: 13px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* lista de temas */
+.cl { border-top: 1px solid var(--rule); }
+.cl > button {
+  display: block; width: 100%; min-height: 0; padding: 10px 4px;
+  text-align: left; background: none; border: 0; border-radius: 0;
+}
+.cl > button:hover, .cl.on > button { background: var(--hi); }
+.cl h3 { display: flex; align-items: baseline; gap: 8px; margin: 0; font-size: 15px; font-weight: 600; }
+.cl h3 .n { margin-left: auto; color: var(--ink2); font-size: 13px; font-weight: 400; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.cl .res { display: block; margin: 3px 0 0; color: var(--ink2); font-size: 13px; font-weight: 400; line-height: 1.4; }
+
+/* nota del método */
+.note { max-width: 76ch; color: var(--ink2); font-size: 15px; }
+.note summary { cursor: pointer; color: var(--ink); font-size: 15px; font-weight: 600; }
+
+@media (max-width: 980px) {
+  .main { grid-template-columns: minmax(0, 1fr); }
+  aside { position: static; max-height: none; }
+}
+@media (max-width: 600px) {
+  .plate { padding: 10px; }
+  input[type=search] { width: 100%; }
+}
+</style>
+</head>
+<body>
+<header class="band"><div class="wrap">
+  <h1>De qué temas están hechas las Bases de RITP</h1>
+  <p class="lede">Cada celda compara dos artículos: más oscura, más parecido su contenido. Los cuadrados sobre la diagonal son los <span class="k-temas">12</span> temas de las Bases. Elige un tema en la lista para acercarte, o haz clic en una fila para ver ese artículo y los que más se le parecen.</p>
+</div></header>
+
+<main class="band" style="padding-top:0"><div class="wrap main">
+  <section class="plate">
+    <div class="ctl">
+      <input id="q" type="search" placeholder="Buscar: 1.8.4, peaje…" autocomplete="off" aria-label="Buscar artículo">
+      <button id="volver" type="button" hidden>← Ver toda la matriz</button>
+    </div>
+    <div class="fig" id="fig">
+      <canvas id="cv" aria-label="Matriz de similitud entre artículos, ordenada por tema"></canvas>
+      <div id="tip"></div>
+    </div>
+    <div class="legend">
+      <span class="ramp">menos parecidos <i></i> más parecidos</span>
+      <span><span class="sw" style="background:var(--adm)"></span>Administrativas</span>
+      <span><span class="sw" style="background:var(--tec)"></span>Técnicas</span>
+      <span><span class="sw" style="background:var(--eco)"></span>Económicas</span>
+      <span><span class="sw" style="background:var(--anx)"></span>Anexos</span>
+    </div>
+    <p id="err"></p>
+  </section>
+
+  <aside>
+    <section class="plate" id="sel">
+      <h2>Artículo seleccionado</h2>
+      <p class="muted">Haz clic en una fila de la matriz o busca un artículo.</p>
+    </section>
+    <section class="plate">
+      <h2>Los <span class="k-temas">12</span> temas</h2>
+      <p class="muted" style="margin:0 0 6px">Un clic acerca la matriz a ese tema.</p>
+      <div id="cls"></div>
+    </section>
+  </aside>
+</div></main>
+
+<section class="band" style="padding-top:0"><div class="wrap"><details class="note">
+  <summary>Cómo se arma la matriz</summary>
+  <p id="metodo"></p>
+  <p id="metodo-nombres"></p>
+  <p id="metodo-corte"></p>
+</details></div></section>
+
+<footer class="pie"><span id="pie-fuente">Fuente: vectores del árbol de nodos de RITP</span> en <a href="https://frr05.github.io/arbol-de-nodos/" target="_blank" rel="noopener">frr05.github.io/arbol-de-nodos</a> · análisis propio</footer>
+
+<script src="datos_RITP.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  // ------------------------------------------------------------------ utilidades
+  const $ = sel => document.querySelector(sel);
+  const ESCAPES = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+  const esc = s => String(s).replace(/[&<>"']/g, c => ESCAPES[c]);
+  const num = (v, dec = 2) => v.toLocaleString("es-CL", { minimumFractionDigits: dec, maximumFractionDigits: dec });
+  const sinTildes = s => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  const mayuscula = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+
+  const VAR_PARTE = { "Administrativas": "--adm", "Técnicas": "--tec", "Económicas": "--eco", "Anexos": "--anx" };
+  // rampa de color de las celdas (índigo del estilo común); la oscura queda por si la página cambia de tema
+  const RAMPA_CLARA = ["#eef0fb", "#c8ccee", "#979edc", "#525dbf", "#2b3586", "#141a3f"];
+  const RAMPA_OSCURA = ["#202226", "#123a6e", "#1c5cab", "#3987e5", "#86b6ef", "#e1eefd"];
+  const GAMMA = 1.7;          // el color sigue el percentil del par; con gamma > 1 solo los más parecidos se oscurecen
+  const LETRA = 'system-ui, -apple-system, "Segoe UI", sans-serif';
+
+  const cv = $("#cv"), fig = $("#fig"), tip = $("#tip");
+
+  // ------------------------------------------------------------------ estado
+  let D = null;               // datos de la concesión
+  let n = 0;                  // filas
+  let S = null;               // similitud (coseno) en orden de fila, n×n
+  let ordenPares = null;      // similitudes de todos los pares i<j, ordenadas (para percentiles)
+  let K = 12;                 // corte mostrado
+  let grupos = null;          // {lab, rep, coh, tramo:[[desde,hasta]], nombre:[], desc:[]}
+  let desde = 0, hasta = 0;   // ventana visible [desde, hasta)
+  let elegido = null;         // fila seleccionada
+  let sobre = null;           // celda bajo el cursor {i, j}
+  let temaActivo = null;      // grupo con zoom
+  let imagen = null;          // matriz completa a 1 px por celda
+
+  const temaOscuro = () => {
+    const t = document.documentElement.dataset.theme;
+    return t ? t === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  };
+  const rgb = h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+  // color calculado de una variable CSS (las de parte son var() anidadas)
+  function colorDe(variable) {
+    const prueba = document.createElement("i");
+    prueba.style.color = `var(${variable})`;
+    document.body.appendChild(prueba);
+    const c = getComputedStyle(prueba).color;
+    prueba.remove();
+    return c;
+  }
+
+  // ------------------------------------------------------------------ percentiles
+  function percentil(v) {                     // fracción de pares con similitud menor que v
+    let a = 0, b = ordenPares.length;
+    while (a < b) { const m = (a + b) >> 1; if (ordenPares[m] < v) a = m + 1; else b = m; }
+    return a / ordenPares.length;
+  }
+
+  function armarImagen() {
+    const paradas = (temaOscuro() ? RAMPA_OSCURA : RAMPA_CLARA).map(rgb);
+    const tramos = paradas.length - 1;
+    const lienzo = document.createElement("canvas");
+    lienzo.width = lienzo.height = n;
+    const ctx = lienzo.getContext("2d");
+    const datos = ctx.createImageData(n, n);
+    for (let p = 0; p < n * n; p++) {
+      const t = Math.pow(Math.min(1, percentil(S[p])), GAMMA) * tramos;
+      const k = Math.min(tramos - 1, Math.floor(t)), f = t - k;
+      const c0 = paradas[k], c1 = paradas[k + 1];
+      datos.data[4 * p] = c0[0] + (c1[0] - c0[0]) * f;
+      datos.data[4 * p + 1] = c0[1] + (c1[1] - c0[1]) * f;
+      datos.data[4 * p + 2] = c0[2] + (c1[2] - c0[2]) * f;
+      datos.data[4 * p + 3] = 255;
+    }
+    ctx.putImageData(datos, 0, 0);
+    imagen = lienzo;
+  }
+
+  // ------------------------------------------------------------------ nombres de los temas
+  // Si el corte trae `nombre` (generado automáticamente) se usa; si no, se arma con sus 3 primeras palabras clave.
+  function nombresDelCorte(c, k) {
+    const out = [];
+    for (let g = 0; g < k; g++) {
+      const dado = Array.isArray(c.nombre) ? c.nombre[g] : null;
+      if (dado && String(dado).trim()) { out.push(String(dado).trim()); continue; }
+      const kw = (c.kw && c.kw[g]) || [];
+      out.push(kw.length ? mayuscula(kw.slice(0, 3).join(", ")) : "");
+    }
+    return out;
+  }
+  // Descripción breve: la del corte si existe; si no, sus palabras clave y un aviso cuando el grupo es poco cohesionado.
+  function descripcionesDelCorte(c, k) {
+    const coh = c.coh || [];
+    const media = coh.reduce((a, b) => a + b, 0) / (coh.length || 1);
+    const de = Math.sqrt(coh.reduce((a, b) => a + (b - media) ** 2, 0) / (coh.length || 1));
+    const minimo = coh.length ? Math.min.apply(null, coh) : null;
+    const out = [];
+    for (let g = 0; g < k; g++) {
+      const dada = Array.isArray(c.desc) ? c.desc[g] : null;
+      if (dada && String(dada).trim()) { out.push(String(dada).trim()); continue; }
+      const kw = (c.kw && c.kw[g]) || [];
+      let txt = kw.length ? `Palabras clave: ${kw.join(", ")}.` : "";
+      if (coh.length > 2 && coh[g] === minimo) txt += " El grupo menos cohesionado.";
+      else if (coh.length > 2 && coh[g] < media - de) txt += " Grupo poco cohesionado.";
+      out.push(txt.trim());
+    }
+    return out;
+  }
+  const nombreTema = g => {
+    const nom = grupos && grupos.nombre[g];
+    return nom ? `G${g + 1} ${nom}` : `G${g + 1}`;
+  };
+
+  function usarCorte(k) {
+    const c = D.cortes[k] || D.cortes[String(k)];
+    K = +k;
+    grupos = { lab: c.lab, rep: c.rep, coh: c.coh, tramo: [], nombre: nombresDelCorte(c, K), desc: descripcionesDelCorte(c, K) };
+    c.lab.forEach((g, i) => {
+      if (!grupos.tramo[g]) grupos.tramo[g] = [i, i];
+      else grupos.tramo[g][1] = i;
+    });
+    if (temaActivo != null && temaActivo >= K) temaActivo = null;
+    document.querySelectorAll(".k-temas").forEach(el => { el.textContent = K; });
+    pintarTemas();
+    if (elegido != null) elegir(elegido);
+    verTodo();
+  }
+
+  // ------------------------------------------------------------------ geometría del dibujo
+  function medidas() {
+    const ancho = fig.clientWidth, len = hasta - desde, cerca = len < n;
+    const izq = cerca && ancho > 420 ? Math.min(360, Math.round(ancho * 0.42)) : 16;   // espacio para rótulos de fila
+    const der = 34;                          // rótulos G1…Gk
+    const franja = 4;                        // franja de partes arriba
+    const arriba = franja + 14;
+    const lado = Math.max(120, Math.min(ancho - izq - der, cerca ? Math.min(760, len * 30) : 900));
+    return { ancho, izq, der, franja, arriba, lado, celda: lado / len, alto: arriba + lado + 6 };
+  }
+
+  function dibujar() {
+    if (!D) return;
+    const m = medidas(), dpr = window.devicePixelRatio || 1;
+    cv.style.height = m.alto + "px";
+    cv.width = Math.round(m.ancho * dpr);
+    cv.height = Math.round(m.alto * dpr);
+    const ctx = cv.getContext("2d");
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, m.ancho, m.alto);
+
+    const tinta = getComputedStyle(document.body).color, tinta2 = colorDe("--ink2");
+    const len = hasta - desde;
+    const X = j => m.izq + (j - desde) * m.celda;
+    const Y = i => m.arriba + (i - desde) * m.celda;
+    const grueso = Math.max(1, m.celda - (m.celda > 4 ? 0.6 : 0));
+
+    // celdas
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(imagen, desde, desde, len, len, m.izq, m.arriba, m.lado, m.lado);
+
+    // franjas con la parte de las Bases (izquierda y arriba)
+    const colorParte = {};
+    Object.keys(VAR_PARTE).forEach(p => { colorParte[p] = colorDe(VAR_PARTE[p]); });
+    for (let i = desde; i < hasta; i++) {
+      ctx.fillStyle = colorParte[D.arts[i].p] || colorDe("--mut");
+      ctx.fillRect(m.izq - 12, Y(i), 8, grueso);
+      ctx.fillRect(X(i), m.franja + 2, grueso, 8);
+    }
+
+    // cajas de los temas y su rótulo a la derecha
+    ctx.font = `600 12px ${LETRA}`;
+    ctx.textBaseline = "middle";
+    grupos.tramo.forEach(([a, b], g) => {
+      const ini = Math.max(a, desde), fin = Math.min(b + 1, hasta);
+      if (ini >= fin) return;
+      const tam = (fin - ini) * m.celda;
+      ctx.strokeStyle = tinta;
+      ctx.lineWidth = g === temaActivo ? 2.5 : 1.2;
+      ctx.strokeRect(X(ini), Y(ini), tam, tam);
+      if (tam >= 12) {
+        ctx.fillStyle = g === temaActivo ? tinta : tinta2;
+        ctx.textAlign = "left";
+        ctx.fillText("G" + (g + 1), m.izq + m.lado + 6, Y(ini) + tam / 2);
+      }
+    });
+
+    // rótulos de fila cuando hay zoom y caben
+    if (m.izq > 30 && m.celda >= 11) {
+      ctx.font = `${Math.min(13, m.celda - 1)}px ${LETRA}`;
+      ctx.textAlign = "right";
+      const maximo = m.izq - 20;
+      for (let i = desde; i < hasta; i++) {
+        const completo = D.arts[i].a + " " + D.arts[i].t;
+        let s = completo;
+        while (s.length > 6 && ctx.measureText(s).width > maximo) s = s.slice(0, -2);
+        if (s !== completo) s = s.trimEnd() + "…";
+        ctx.fillStyle = i === elegido ? tinta : tinta2;
+        ctx.fillText(s, m.izq - 16, Y(i) + m.celda / 2);
+      }
+    }
+
+    // cruz de la fila elegida
+    if (elegido != null && elegido >= desde && elegido < hasta) {
+      ctx.strokeStyle = tinta;
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(m.izq, Y(elegido), m.lado, m.celda);
+      ctx.strokeRect(X(elegido), m.arriba, m.celda, m.lado);
+    }
+    // celda bajo el cursor
+    if (sobre) {
+      ctx.strokeStyle = temaOscuro() ? "#fff" : "#000";
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(X(sobre.j) - 1, Y(sobre.i) - 1, m.celda + 2, m.celda + 2);
+    }
+  }
+
+  // ------------------------------------------------------------------ interacción con la matriz
+  function celdaEn(ev) {
+    const r = cv.getBoundingClientRect(), m = medidas();
+    const mx = ev.clientX - r.left, my = ev.clientY - r.top;
+    const i = desde + Math.floor((my - m.arriba) / m.celda);
+    const j = desde + Math.floor((mx - m.izq) / m.celda);
+    return {
+      i: my >= m.arriba && i >= desde && i < hasta ? i : null,
+      j: mx >= m.izq && j >= desde && j < hasta ? j : null,
+      mx, my,
+    };
+  }
+
+  function ocultarTip() { tip.style.display = "none"; sobre = null; dibujar(); }
+
+  function mostrarTip(c) {
+    if (c.i == null || c.j == null) { ocultarTip(); return; }
+    sobre = { i: c.i, j: c.j };
+    const A = D.arts[c.i], B = D.arts[c.j], v = S[c.i * n + c.j];
+    if (c.i === c.j) {
+      tip.innerHTML = `<b>${esc(A.a)}</b> ${esc(A.t)}<br>G${grupos.lab[c.i] + 1}, ${esc(A.p.toLowerCase())}`;
+    } else {
+      const mismo = grupos.lab[c.i] === grupos.lab[c.j] ? " (mismo grupo)" : "";
+      tip.innerHTML = `<b>${esc(A.a)}</b> ${esc(A.t)}<br><b>${esc(B.a)}</b> ${esc(B.t)}<br>` +
+        `Similitud <b>${num(v)}</b>, más que el ${Math.round(100 * percentil(v))} % de los pares${mismo}`;
+    }
+    tip.style.display = "block";
+    const w = tip.offsetWidth, h = tip.offsetHeight;
+    tip.style.left = Math.min(fig.clientWidth - w - 4, Math.max(0, c.mx + 14)) + "px";
+    tip.style.top = (c.my + 16 + h > fig.clientHeight ? c.my - h - 12 : c.my + 16) + "px";
+    dibujar();
+  }
+
+  function elegir(i, desplazar) {
+    elegido = i;
+    const A = D.arts[i];
+    const vecinos = [];
+    for (let j = 0; j < n; j++) if (j !== i) vecinos.push(j);
+    vecinos.sort((a, b) => S[i * n + b] - S[i * n + a]);
+    const top = vecinos.slice(0, 8);
+    const enSuGrupo = top.filter(j => grupos.lab[j] === grupos.lab[i]).length;
+    const color = VAR_PARTE[A.p] || "--mut";
+    $("#sel").innerHTML =
+      `<h2>${esc(A.a)} ${esc(A.t)}</h2>` +
+      `<p class="muted"><span class="sw" style="background:var(${color})"></span>Bases ${esc(A.p)}, grupo ${esc(nombreTema(grupos.lab[i]))}, ${A.f} fragmentos</p>` +
+      `<p class="x">${esc(A.x)}${A.x.length >= 420 ? "…" : ""}</p>` +
+      `<p style="margin-top:12px"><b>Más parecidos</b> <span class="muted">(${enSuGrupo} de 8 en su mismo grupo)</span></p>` +
+      `<ul class="lst">` + top.map(j =>
+        `<li><button type="button" data-i="${j}"><span>${esc(D.arts[j].a)} ${esc(D.arts[j].t)}</span>` +
+        `<span class="n">${num(S[i * n + j])} G${grupos.lab[j] + 1}</span></button></li>`).join("") + `</ul>`;
+    if (desplazar && window.innerWidth <= 980) $("#sel").scrollIntoView({ behavior: "smooth", block: "start" });
+    dibujar();
+  }
+
+  function pintarTemas() {
+    $("#cls").innerHTML = grupos.tramo.map(([a, b], g) => {
+      const on = g === temaActivo;
+      const desc = grupos.desc[g] ? `<span class="res">${esc(grupos.desc[g])}</span>` : "";
+      return `<div class="cl${on ? " on" : ""}"><button type="button" data-c="${g}" aria-pressed="${on}">` +
+        `<h3>${esc(nombreTema(g))}<span class="n">${b - a + 1} art.</span></h3>${desc}</button></div>`;
+    }).join("");
+  }
+
+  function acercarA(g) {
+    temaActivo = g;
+    const [a, b] = grupos.tramo[g];
+    const margen = Math.max(2, Math.round((b - a + 1) * 0.15));
+    desde = Math.max(0, a - margen);
+    hasta = Math.min(n, b + 1 + margen);
+    $("#volver").hidden = false;
+    pintarTemas();
+    dibujar();
+    if (window.innerWidth <= 980) fig.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function verTodo() {
+    desde = 0; hasta = n; temaActivo = null;
+    $("#volver").hidden = true;
+    pintarTemas();
+    dibujar();
+  }
+
+  // ------------------------------------------------------------------ textos que dependen del modelo
+  function textosDelModelo() {
+    const modelo = String(D.modelo || "");
+    const esTfidf = /tf-?idf|lsa/i.test(modelo);
+    const esBge = /bge-m3/i.test(modelo);
+    let rep, agrupa, pie;
+    if (esTfidf) {
+      rep = "Cada fragmento de las Bases (incisos, párrafos y tablas) se representa por sus palabras con tf-idf, y esos " +
+        "vectores se reducen con LSA (análisis semántico latente, una descomposición en valores singulares) para que " +
+        "palabras que suelen aparecer juntas cuenten como parecidas. La similitud sale de tf-idf + LSA sobre los " +
+        "fragmentos; no se usa un modelo de lenguaje como bge-m3.";
+      agrupa = "El corte en grupos sale solo de esos vectores: no se usa el índice de las Bases para agrupar.";
+      pie = "Fuente: tf-idf + LSA sobre los fragmentos del árbol de nodos de RITP";
+    } else if (esBge) {
+      rep = "Cada fragmento de las Bases (incisos, párrafos y tablas) tiene un vector de 1.024 números calculado con el modelo bge-m3.";
+      agrupa = "El corte en grupos sale solo de esos vectores: no se usan palabras clave ni el índice de las Bases para agrupar.";
+      pie = "Fuente: vectores bge-m3 del árbol de nodos de RITP";
+    } else {
+      rep = `Cada fragmento de las Bases (incisos, párrafos y tablas) tiene un vector calculado con el modelo ${modelo || "de similitud"}.`;
+      agrupa = "El corte en grupos sale solo de esos vectores: no se usa el índice de las Bases para agrupar.";
+      pie = `Fuente: vectores ${modelo || "de similitud"} del árbol de nodos de RITP`;
+    }
+    $("#metodo").textContent = rep + " Los vectores de un mismo artículo x.y.z se promedian, y la similitud entre dos " +
+      "artículos es el coseno entre sus promedios. Filas y columnas van en el orden del dendrograma (agrupamiento de " +
+      "Ward), por eso los temas aparecen como bloques sobre la diagonal. " + agrupa +
+      " La sección de cada artículo se muestra en las franjas de color solo para comparar.";
+
+    const c = D.cortes[K] || D.cortes[String(K)];
+    $("#metodo-nombres").textContent = Array.isArray(c.nombre)
+      ? "Los nombres de los temas se generan automáticamente a partir del contenido de cada grupo; no están escritos a mano."
+      : "Cada tema se nombra con sus tres términos más característicos (tf-idf), sin edición manual; la descripción lista sus seis términos.";
+
+    const ks = Object.keys(D.cortes).map(Number).sort((a, b) => a - b);
+    const rango = ks.length > 1 ? `entre ${ks[0]} y ${ks[ks.length - 1]}` : `de ${ks[0]}`;
+    $("#metodo-corte").textContent = esBge
+      ? `La separación entre grupos es gradual: ningún número de grupos ${rango} los separa con nitidez. Se muestra el corte en ${K}, que es el que mejor se lee.`
+      : `Se calcularon cortes con un número de grupos ${rango}. Se muestra el corte en ${K}.`;
+
+    $("#pie-fuente").textContent = pie;   // el pie ya puede estar dentro del de nav.js; el nodo es el mismo
+  }
+
+  // ------------------------------------------------------------------ arranque
+  function iniciar(datos) {
+    D = datos;
+    n = D.arts.length;
+    S = Float32Array.from(D.S, v => v / 1000);
+    const pares = new Float32Array(n * (n - 1) / 2);
+    let p = 0;
+    for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) pares[p++] = S[i * n + j];
+    ordenPares = pares.sort();
+    armarImagen();
+    hasta = n;
+    const ks = Object.keys(D.cortes).map(Number).sort((a, b) => a - b);
+    const k = ks.includes(12) ? 12 : ks[Math.floor(ks.length / 2)];
+    K = k;
+    textosDelModelo();
+    usarCorte(k);
+    new ResizeObserver(() => dibujar()).observe(fig);
+  }
+
+  cv.addEventListener("mousemove", ev => mostrarTip(celdaEn(ev)));
+  cv.addEventListener("mouseleave", ocultarTip);
+  cv.addEventListener("click", ev => {
+    if (!D) return;
+    const c = celdaEn(ev);
+    if (c.i == null) return;
+    elegir(c.i, true);
+    if (ev.pointerType === "touch" || matchMedia("(hover: none)").matches) mostrarTip(c);
+  });
+  $("#volver").addEventListener("click", verTodo);
+  document.addEventListener("keydown", ev => { if (ev.key === "Escape" && D && hasta - desde < n) verTodo(); });
+  document.addEventListener("click", ev => {
+    const b = ev.target.closest("button[data-i], button[data-c]");
+    if (!b || !D) return;
+    if (b.hasAttribute("data-c")) { acercarA(+b.dataset.c); return; }
+    const i = +b.dataset.i;
+    if (i < desde || i >= hasta) verTodo();
+    elegir(i, true);
+  });
+  $("#q").addEventListener("change", ev => {
+    const bruto = ev.target.value.trim(), q = sinTildes(bruto);
+    if (!q || !D) return;
+    let i = D.arts.findIndex(A => sinTildes(A.a) === q);                     // primero, número exacto
+    if (i < 0) i = D.arts.findIndex(A => sinTildes(`${A.a} ${A.t} ${A.x}`).includes(q));
+    if (i < 0) {
+      $("#sel").innerHTML = `<h2>Sin resultados</h2><p class="muted">Ningún artículo contiene «${esc(bruto)}».</p>`;
+      return;
+    }
+    acercarA(grupos.lab[i]);
+    elegir(i, true);
+  });
+
+  const cambioDeTema = () => { if (D) { armarImagen(); dibujar(); } };
+  new MutationObserver(cambioDeTema).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", cambioDeTema);
+
+  // datos_RITP.js funciona con file://; si no está, se prueba el JSON (requiere servidor)
+  const dado = window.MATRIZ && window.MATRIZ.RITP;
+  if (dado) iniciar(dado);
+  else fetch("datos_RITP.json").then(r => r.json()).then(iniciar)
+    .catch(() => { $("#err").textContent = "No se pudieron cargar los datos de la matriz."; });
+})();
+</script>
+<script src="../nav.js"></script>
+</body>
+</html>

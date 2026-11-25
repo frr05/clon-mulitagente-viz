@@ -1,0 +1,93 @@
+/* nav.css: barra superior (.sn) y pie (.sp) que arma nav.js. Todo cuelga de .sn / .sp para no pisar el CSS
+   de cada página. La barra mide 48 px, queda pegada arriba al hacer scroll y usa el fondo de la página (--fondo).
+   --sn-pad es el margen lateral de barra y pie; nav.js lo deja en 0 cuando el body ya tiene margen propio. */
+
+.sn, .sp { --sn-linea: color-mix(in srgb, currentColor 14%, transparent); }
+.sn *, .sp * { box-sizing: border-box; }
+
+/* ---------------------------------------------------------------- barra */
+.sn {
+  box-sizing: border-box;
+  position: sticky; top: 0; z-index: 30;
+  display: flex; align-items: center; gap: 4px 18px;
+  height: 48px; padding: 0 var(--sn-pad, 18px);
+  background: var(--fondo, Canvas); color: inherit;
+  border-bottom: 1px solid var(--sn-linea);
+  font: 500 14px/1 system-ui, -apple-system, "Segoe UI", sans-serif;
+  white-space: nowrap;
+}
+.sn-marca {
+  flex: 0 1 auto; margin-right: auto;
+  overflow: hidden; text-overflow: ellipsis;
+  color: inherit; font-weight: 650; text-decoration: none;
+}
+.sn-marca span { font-weight: 400; opacity: .65; }
+
+.sn-lista {
+  flex: 0 1 auto; display: flex; align-items: stretch; gap: 2px;
+  height: 100%; margin: 0; padding: 0; list-style: none;
+  overflow-x: auto; scrollbar-width: none;
+}
+.sn-lista::-webkit-scrollbar { display: none; }
+.sn-lista > li { display: flex; flex: none; }   /* sin encogerse: en pantallas angostas la lista se desplaza en vez de encimar textos */
+
+.sn-a {
+  display: inline-flex; align-items: center; padding: 0 10px;
+  color: inherit; text-decoration: none; opacity: .7;
+  border-bottom: 2px solid transparent; margin-bottom: -1px;   /* el subrayado se monta sobre la línea de la barra */
+}
+.sn-a:hover { opacity: 1; }
+.sn-a.on, .sn-a[aria-current="page"] { opacity: 1; font-weight: 650; border-bottom-color: currentColor; }
+
+/* las páginas aparte (Temas de RITP) van separadas por una línea vertical */
+.sn-a-pag {
+  align-self: center; height: 24px;
+  margin-left: 10px; padding-left: 10px;
+  border-left: 1px solid var(--sn-linea);
+}
+.sn-a-pag .sn-a { height: 24px; margin: 0; border-bottom: 0; }
+.sn-a-pag .sn-a[aria-current="page"] {
+  text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 6px;
+}
+
+.sn-a:focus-visible, .sp a:focus-visible { outline: 2px solid #2a78d6; outline-offset: -2px; border-radius: 4px; }
+
+/* ---------------------------------------------------------------- pie */
+.sp {
+  display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 20px 48px; align-items: center;
+  margin-top: 40px; padding: 28px var(--sn-pad, 18px) 32px;
+  border-top: 1px solid currentColor; color: inherit;
+  font: 400 13px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+.sp-marcas { display: flex; align-items: center; gap: 28px; }
+.sp-marcas a { display: block; line-height: 0; }
+.sp-marcas a + a { padding-left: 28px; border-left: 1px solid var(--sn-linea); }
+.sp-marcas img { display: block; width: auto; }
+
+.sp-texto p { margin: 0; }
+.sp-quien { opacity: .8; }
+.sp-quien b { opacity: 1; }
+.sp-lista { display: flex; flex-wrap: wrap; gap: 4px 18px; margin: 10px 0; padding: 0; list-style: none; }
+.sp-a { color: inherit; font-weight: 500; text-decoration: none; opacity: .8; }
+.sp-a:hover { opacity: 1; text-decoration: underline; text-underline-offset: 3px; }
+.sp-fuente { font-size: 12px; opacity: .65; }
+.sp-fuente:empty { display: none; }
+
+/* ---------------------------------------------------------------- pantallas angostas e impresión */
+@media (max-width: 1000px) {
+  .sn-marca span { display: none; }
+  .sp { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 720px) {
+  .sn { gap: 4px 8px; }
+  .sn-marca { display: none; }
+  .sn-a { padding: 0 8px; }
+  .sp-marcas { flex-wrap: wrap; gap: 18px; }
+  .sp-marcas a + a { padding-left: 18px; }
+  .sp-catlec { height: 32px; }
+  .sp-dii { height: 36px; }
+}
+@media print {
+  .sn { display: none; }
+  .sp { margin-top: 16px; }
+}

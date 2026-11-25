@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Matriz temática RITP</title>
+<link rel="stylesheet" href="../estilo.css">
+<link rel="stylesheet" href="../nav.css">
+<style>.sn,.sp{--sn-pad:max(28px,calc((100vw - 1384px) / 2))}</style>
+<style>
+/* VOICE work: a technical reading tool for people who know the Bases by heart
+   IDEA a correlation plate from an instrument: the matrix is the reading, everything else is the bezel
+   PICTURE the clustered cosine matrix with its dendrogram on top, zoomable by cluster
+   COLOUR y TYPE: el estilo común del visor (estilo.css): fondo casi blanco, placa blanca, rampa índigo, colores de parte comunes
+   LAYOUT laptop: matrix left (fills height), readout panel right; phone: title, matrix, panel */
+:root{--bg:var(--fondo);--plate:var(--papel);--ink:var(--tinta);--ink2:var(--suave);--mut:var(--tenue);--rule:var(--linea);--adm:var(--p-adm);--tec:var(--p-tec);--eco:var(--p-eco);--anx:var(--p-anx);--hi:var(--resalte)}
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 var(--fuente);overflow-x:clip}
+.band{padding:24px 28px}
+.wrap{max-width:1384px;margin:0 auto}
+header.band .wrap{border-bottom:1px solid var(--rule)}
+h1{font-size:28px;line-height:1.15;letter-spacing:-.01em;font-weight:700;margin:0 0 6px;text-wrap:balance}
+.lede{color:var(--ink2);font-size:14px;max-width:110ch;margin:0;padding-bottom:12px}
+.figs{display:grid;grid-template-columns:repeat(4,1fr);margin:0;padding:0;list-style:none;border-top:1px solid var(--ink)}
+.figs li{padding:12px 16px 14px 0}.figs li+li{padding-left:16px;border-left:1px solid var(--rule)}
+.figs b{display:block;font-size:30px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.15;letter-spacing:-.01em}
+.figs span{font-size:13px;color:var(--ink2)}
+.main{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:20px;align-items:start}
+.plate{background:var(--plate);border:1px solid var(--rule);border-radius:8px;padding:16px}
+.ctl{display:flex;flex-wrap:wrap;gap:12px 22px;align-items:center;margin-bottom:12px}
+.ctl label{font-size:14px;color:var(--ink2);display:flex;gap:10px;align-items:center}
+input[type=range]{width:180px;height:44px;accent-color:var(--acento)}
+input[type=search]{font:inherit;font-size:16px;padding:8px 12px;border:1px solid var(--rule);border-radius:8px;background:var(--plate);color:var(--ink);width:240px;min-height:44px}
+button{font:inherit;font-size:14px;color:var(--ink);background:var(--plate);border:1px solid var(--rule);border-radius:999px;padding:8px 12px;min-height:40px;cursor:pointer}
+button:hover{border-color:var(--ink)}
+button:focus-visible,input:focus-visible{outline:2px solid var(--acento);outline-offset:2px}
+#volver[hidden]{display:none}
+.fig{position:relative;touch-action:manipulation}
+#cv{display:block;width:100%;cursor:crosshair}
+#tip{position:absolute;pointer-events:none;background:var(--plate);border:1px solid var(--rule);border-radius:8px;padding:8px 10px;font-size:13px;line-height:1.4;max-width:300px;box-shadow:0 2px 10px rgb(0 0 0/.12);display:none;z-index:2}
+#tip b{font-variant-numeric:tabular-nums}
+.legend{display:flex;flex-wrap:wrap;gap:10px 26px;align-items:center;margin-top:12px;font-size:13px;color:var(--ink2)}
+.ramp{display:flex;align-items:center;gap:8px}
+.ramp i{display:block;width:150px;height:10px;border-radius:2px;background:linear-gradient(90deg,#eef0fb,#c8ccee,#979edc,#525dbf,#2b3586,#141a3f)}
+.sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+aside{display:grid;gap:16px;position:sticky;top:calc(var(--sn-h,48px) + 12px);max-height:calc(100vh - var(--sn-h,48px) - 24px);overflow:auto}
+h2{font-size:17px;font-weight:600;margin:0 0 8px;letter-spacing:-.01em}
+.muted{color:var(--ink2);font-size:14px}
+#sel p{margin:6px 0;font-size:14px}
+#sel .x{color:var(--ink2);font-size:13px;line-height:1.5;border-left:2px solid var(--rule);padding-left:10px}
+.lst{list-style:none;margin:0;padding:0}
+.lst li{border-top:1px solid var(--rule)}
+.lst button{border:0;border-radius:0;width:100%;text-align:left;padding:6px 2px;min-height:36px;display:flex;gap:10px;align-items:baseline}
+.lst .n{font-variant-numeric:tabular-nums;color:var(--ink2);white-space:nowrap;margin-left:auto;font-size:13px;flex:none}
+.cl{border-top:1px solid var(--rule)}
+.cl>button{display:block;width:100%;text-align:left;border:0;border-radius:0;background:none;padding:10px 4px;min-height:0}
+.cl>button:hover{background:var(--hi)}
+.cl.on>button{background:var(--hi)}
+.cl h3{font-size:15px;margin:0;display:flex;gap:8px;align-items:baseline;font-weight:600}
+.cl h3 .n{margin-left:auto;font-weight:400;font-size:13px;color:var(--ink2);font-variant-numeric:tabular-nums;white-space:nowrap}
+.bar{display:flex;gap:2px;height:8px;margin:7px 0 5px}
+.bar i{display:block;height:100%;border-radius:2px}
+.cl ol{margin:4px 0 6px;padding:0;list-style:none;font-size:13px;color:var(--ink2)}
+.cl ol li{padding:2px 0}
+.cl ol button{border:0;padding:1px 0;min-height:0;font-size:13px;color:var(--ink2);text-align:left;text-decoration:underline;text-decoration-color:var(--rule);text-underline-offset:3px}
+.cl .res{display:block;font-size:13px;margin:3px 0 0;line-height:1.4;color:var(--ink2);font-weight:400}
+.cl .zoom{font-size:13px;padding:4px 10px;min-height:32px}
+.note{max-width:76ch;color:var(--ink2);font-size:15px}
+.note summary{cursor:pointer;color:var(--ink);font-weight:600;font-size:15px}
+.note h2{color:var(--ink)}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;font-size:14px;width:100%}
+th,td{text-align:left;padding:5px 8px;border-bottom:1px solid var(--rule)}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+#err{color:#d03b3b}
+@media(max-width:980px){.main{grid-template-columns:minmax(0,1fr)}aside{position:static;max-height:none}}
+@media(max-width:600px){.plate{padding:10px}input[type=search]{width:100%}.ctl label{flex-wrap:wrap}table{font-size:13px}th,td{padding:5px 4px}}
+</style>
+</head>
+<body>
+<header class="band"><div class="wrap">
+  <h1>De qué temas están hechas las Bases de RITP</h1>
+  <p class="lede">Cada celda compara dos artículos: más oscura, más parecido su contenido. Los cuadrados sobre la diagonal son los 12 temas de las Bases. Elige un tema en la lista para acercarte, o haz clic en una fila para ver ese artículo y los que más se le parecen.</p>
+</div></header>
+
+<main class="band" style="padding-top:0"><div class="wrap main">
+  <section class="plate">
+    <div class="ctl">
+      <input id="q" type="search" placeholder="Buscar: 1.8.4, peaje…" autocomplete="off">
+      <button id="volver" hidden>← Ver toda la matriz</button>
+    </div>
+    <div class="fig" id="fig"><canvas id="cv" aria-label="Matriz de similitud entre artículos, ordenada por tema"></canvas><div id="tip"></div></div>
+    <div class="legend">
+      <span class="ramp">menos parecidos <i></i> más parecidos</span>
+      <span><span class="sw" style="background:var(--adm)"></span>Administrativas</span>
+      <span><span class="sw" style="background:var(--tec)"></span>Técnicas</span>
+      <span><span class="sw" style="background:var(--eco)"></span>Económicas</span>
+      <span><span class="sw" style="background:var(--anx)"></span>Anexos</span>
+    </div>
+    <p id="err"></p>
+  </section>
+
+  <aside>
+    <section class="plate" id="sel"><h2>Artículo seleccionado</h2><p class="muted">Haz clic en una fila de la matriz o busca un artículo.</p></section>
+    <section class="plate"><h2>Los 12 temas</h2><p class="muted" style="margin:0 0 6px">Un clic acerca la matriz a ese tema.</p><div id="cls"></div></section>
+  </aside>
+</div></main>
+
+<section class="band" style="padding-top:0"><div class="wrap"><details class="note">
+  <summary>Cómo se arma la matriz</summary>
+  <p>Cada fragmento de las Bases (incisos, párrafos y tablas) tiene un vector de 1.024 números calculado con el modelo bge-m3. Los vectores de un mismo artículo x.y.z se promedian, y la similitud entre dos artículos es el coseno entre sus promedios. Filas y columnas van en el orden del dendrograma (agrupamiento de Ward), por eso los temas aparecen como bloques sobre la diagonal. El corte en grupos sale solo de esos vectores: no se usan palabras clave ni el índice de las Bases para agrupar. La sección de cada artículo se muestra en las franjas de color solo para comparar.</p>
+  <p>La separación entre grupos es gradual: ningún número de grupos entre 4 y 16 los separa con nitidez. Se muestra el corte en 12, que es el que mejor se lee.</p>
+</details></div></section>
+
+<footer class="pie">Fuente: vectores bge-m3 del árbol de nodos de RITP en <a href="https://frr05.github.io/arbol-de-nodos/" target="_blank" rel="noopener">frr05.github.io/arbol-de-nodos</a> · análisis propio</footer>
+
+
+<script src="datos_RITP.js"></script>
+<script>
+{
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt = (v, d=2) => v.toLocaleString('es-CL', {minimumFractionDigits:d, maximumFractionDigits:d});
+const norm = s => s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
+const PCOL = {Administrativas:'--adm', 'Técnicas':'--tec', 'Económicas':'--eco', Anexos:'--anx'};
+const PABR = {Administrativas:'adm.', 'Técnicas':'téc.', 'Económicas':'econ.', Anexos:'anexos'};
+const RAMP_L = ['#eef0fb','#c8ccee','#979edc','#525dbf','#2b3586','#141a3f']; // índigo del estilo común
+const RAMP_D = ['#202226','#123a6e','#1c5cab','#3987e5','#86b6ef','#e1eefd'];
+const RES = {12: [
+  ['Riesgos y contingencias', 'Planes de prevención de riesgos y de control de accidentes en construcción y explotación, más la protección a la comunidad.'],
+  ['Medio ambiente por componente', 'Planes de manejo ambiental en construcción y explotación por aire, ruido, suelos, aguas, flora y fauna, paisaje; y el estudio de impacto ambiental.'],
+  ['Diseño y obras físicas', 'Ingeniería de detalle, obras nuevas, señalización y seguridad vial, expropiaciones, instalación de faenas y pesos máximos.'],
+  ['Control e información al Inspector Fiscal', 'Autocontrol de calidad, ensayos, informes ambientales, estadísticas, libro de explotación y programa de conservación: todo lo que se reporta.'],
+  ['Seguros, pagos y responsabilidad', 'Daños a terceros, seguro por catástrofe, suspensión, costos del contrato, pagos e intereses, subcontratos y patentes.'],
+  ['Ciclo de vida del contrato', 'Construcción y puesta en servicio, inspección fiscal, garantías, multas, terrenos, desvíos de tránsito y extinción de la concesión.'],
+  ['Evaluación económica', 'Factores de licitación, ofertas por tramos A, B y C, subsidio del Estado, premio al postulante y adjudicación.'],
+  ['Presentación y apertura de ofertas', 'Idioma, moneda, entrega y contenido de los sobres técnico y económico, apertura y evaluación.'],
+  ['Reglas del proceso de licitación', 'Participantes, documentos de las Bases, consultas, garantía de seriedad, validez de la oferta, firma del contrato y comisión conciliadora. Grupo poco cohesionado.'],
+  ['Peajes y tarifas', 'Sistema tarifario, clases de vehículos, cobro por derecho de paso o uso efectivo, congestión y tiempos de espera en plazas de peaje.'],
+  ['Proyecto y régimen económico', 'Descripción del proyecto, plazo, pagos del concesionario, nuevas inversiones, distribución de riesgos, ajuste tarifario y formularios de la propuesta económica.'],
+  ['Textos generales y obras opcionales', 'Introducción, encabezado de las Bases Económicas y obras opcionales (Prolongación Av. Alessandri, Camino Carriel Sur). El grupo menos cohesionado.'],
+]};
+const gName = c => RES[K] ? `G${c + 1} ${RES[K][c][0]}` : `G${c + 1}`;
+const GAMMA = 1.7; // color por percentil del par: solo los pares más parecidos se ven oscuros
+const cv = $('#cv'), fig = $('#fig'), tip = $('#tip');
+let D, n, S, offs, K = 12, cut, v0 = 0, v1 = 0, sel = null, hov = null, selC = null, G = {}, img = null, px = [], ph = [];
+
+const isDark = () => { const t = document.documentElement.dataset.theme; return t ? t === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches; };
+const hex = h => [1,3,5].map(i => parseInt(h.slice(i, i+2), 16));
+const css = v => getComputedStyle(document.body).getPropertyValue(v).trim();
+const cssColor = v => { const e = document.createElement('i'); e.style.color = `var(${v})`; document.body.appendChild(e); const c = getComputedStyle(e).color; e.remove(); return c; };
+
+function buildImage() {
+  const stops = (isDark() ? RAMP_D : RAMP_L).map(hex);
+  const c = document.createElement('canvas'); c.width = n; c.height = n;
+  const x = c.getContext('2d'), im = x.createImageData(n, n);
+  for (let i = 0; i < n*n; i++) {
+    const t = Math.pow(Math.min(1, pctF(S[i])), GAMMA) * (stops.length - 1);
+    const a = Math.min(stops.length - 2, Math.floor(t)), f = t - a;
+    for (let k = 0; k < 3; k++) im.data[i*4+k] = stops[a][k] + (stops[a+1][k] - stops[a][k]) * f;
+    im.data[i*4+3] = 255;
+  }
+  x.putImageData(im, 0, 0); img = c;
+}
+
+function pctF(v) { let lo = 0, hi = offs.length; while (lo < hi) { const m = (lo + hi) >> 1; offs[m] < v ? lo = m + 1 : hi = m; } return lo / offs.length; }
+const pct = v => Math.round(100 * pctF(v));
+
+function setK(k) {
+  K = k; const c = D.cortes[k]; cut = c.corte; G = {lab: c.lab, rep: c.rep, coh: c.coh, span: []};
+  for (let i = 0; i < n; i++) { const g = c.lab[i]; G.span[g] ? G.span[g][1] = i : G.span[g] = [i, i]; }
+  if (selC != null && selC >= k) selC = null;
+  renderClusters(); renderSel(); fullView();
+}
+
+function geo() {
+  const W = fig.clientWidth, z = v1 - v0 < n;
+  const lm = z && W > 420 ? Math.min(360, Math.round(W * .42)) : 16;
+  const rm = 34, th = 4;
+  const size = Math.max(120, Math.min(W - lm - rm, z ? Math.min(760, (v1 - v0) * 30) : 900));
+  return {W, lm, rm, th, mt: th + 14, size, cell: size / (v1 - v0), H: th + 14 + size + 6};
+}
+
+function draw() {
+  if (!D) return;
+  const g = geo(), dpr = devicePixelRatio || 1;
+  cv.style.height = g.H + 'px'; cv.width = Math.round(g.W * dpr); cv.height = Math.round(g.H * dpr);
+  const x = cv.getContext('2d'); x.setTransform(dpr, 0, 0, dpr, 0, 0); x.clearRect(0, 0, g.W, g.H);
+  const ink = css('color') || getComputedStyle(document.body).color, ink2 = cssColor('--ink2'), mut = '#8b8fa3';
+  const len = v1 - v0, X = j => g.lm + (j - v0) * g.cell, Y = i => g.mt + (i - v0) * g.cell;
+  x.imageSmoothingEnabled = false;
+  x.drawImage(img, v0, v0, len, len, g.lm, g.mt, g.size, g.size);
+  // franjas de sección
+  const pc = {}; for (const p in PCOL) pc[p] = cssColor(PCOL[p]);
+  for (let i = v0; i < v1; i++) {
+    x.fillStyle = pc[D.arts[i].p];
+    x.fillRect(g.lm - 12, Y(i), 8, Math.max(1, g.cell - (g.cell > 4 ? .6 : 0)));
+    x.fillRect(X(i), g.th + 2, Math.max(1, g.cell - (g.cell > 4 ? .6 : 0)), 8);
+  }
+  // cajas de grupos y rótulos
+  x.font = '600 12px Geist, system-ui, sans-serif'; x.textBaseline = 'middle';
+  G.span.forEach(([a, b], c) => {
+    const a2 = Math.max(a, v0), b2 = Math.min(b + 1, v1); if (a2 >= b2) return;
+    x.strokeStyle = ink; x.lineWidth = c === selC ? 2.5 : 1.2;
+    x.strokeRect(X(a2), Y(a2), (b2 - a2) * g.cell, (b2 - a2) * g.cell);
+    if ((b2 - a2) * g.cell >= 12) { x.fillStyle = c === selC ? ink : ink2; x.textAlign = 'left'; x.fillText('G' + (c + 1), g.lm + g.size + 6, Y(a2) + (b2 - a2) * g.cell / 2); }
+  });
+  // rótulos de filas al acercarse
+  if (g.lm > 30 && g.cell >= 11) {
+    x.font = `${Math.min(13, g.cell - 1)}px Geist, system-ui, sans-serif`; x.textAlign = 'right';
+    for (let i = v0; i < v1; i++) {
+      let s = D.arts[i].a + ' ' + D.arts[i].t; const max = g.lm - 20;
+      while (x.measureText(s).width > max && s.length > 6) s = s.slice(0, -2);
+      if (s.length < (D.arts[i].a + ' ' + D.arts[i].t).length) s = s.trimEnd() + '…';
+      x.fillStyle = i === sel ? ink : ink2; x.fillText(s, g.lm - 16, Y(i) + g.cell / 2);
+    }
+  }
+  // selección y cursor
+  if (sel != null && sel >= v0 && sel < v1) {
+    x.strokeStyle = ink; x.lineWidth = 1.5;
+    x.strokeRect(g.lm, Y(sel), g.size, g.cell); x.strokeRect(X(sel), g.mt, g.cell, g.size);
+  }
+  if (hov) { x.strokeStyle = isDark() ? '#fff' : '#000'; x.lineWidth = 1.5; x.strokeRect(X(hov.j) - 1, Y(hov.i) - 1, g.cell + 2, g.cell + 2); }
+}
+
+function cellAt(e) {
+  const r = cv.getBoundingClientRect(), g = geo(), mx = e.clientX - r.left, my = e.clientY - r.top;
+  const j = Math.floor((mx - g.lm) / g.cell) + v0, i = Math.floor((my - g.mt) / g.cell) + v0;
+  const inRow = i >= v0 && i < v1 && my >= g.mt, inCol = j >= v0 && j < v1;
+  return {i: inRow ? i : null, j: inCol && mx >= g.lm ? j : null, mx, my, g};
+}
+
+function showTip(c) {
+  if (c.i == null || c.j == null) { tip.style.display = 'none'; hov = null; draw(); return; }
+  hov = {i: c.i, j: c.j}; const A = D.arts[c.i], B = D.arts[c.j], v = S[c.i * n + c.j];
+  tip.innerHTML = c.i === c.j ? `<b>${esc(A.a)}</b> ${esc(A.t)}<br>G${G.lab[c.i] + 1}, ${esc(A.p.toLowerCase())}` :
+    `<b>${esc(A.a)}</b> ${esc(A.t)}<br><b>${esc(B.a)}</b> ${esc(B.t)}<br>Similitud <b>${fmt(v)}</b>, más que el ${pct(v)} % de los pares${G.lab[c.i] === G.lab[c.j] ? ' (mismo grupo)' : ''}`;
+  tip.style.display = 'block';
+  const fw = fig.clientWidth, tw = tip.offsetWidth, th = tip.offsetHeight;
+  tip.style.left = Math.min(fw - tw - 4, Math.max(0, c.mx + 14)) + 'px';
+  tip.style.top = (c.my + 16 + th > fig.clientHeight ? c.my - th - 12 : c.my + 16) + 'px';
+  draw();
+}
+
+function select(i, scroll) {
+  sel = i; const A = D.arts[i], row = Array.from({length: n}, (_, j) => j).filter(j => j !== i).sort((a, b) => S[i*n+b] - S[i*n+a]).slice(0, 8);
+  const sameG = row.filter(j => G.lab[j] === G.lab[i]).length;
+  $('#sel').innerHTML = `<h2>${esc(A.a)} ${esc(A.t)}</h2>
+    <p class="muted"><span class="sw" style="background:var(${PCOL[A.p]})"></span>Bases ${esc(A.p)}, grupo ${esc(gName(G.lab[i]))}, ${A.f} fragmentos</p>
+    <p class="x">${esc(A.x)}${A.x.length >= 420 ? '…' : ''}</p>
+    <p style="margin-top:12px"><b>Más parecidos</b> <span class="muted">(${sameG} de 8 en su mismo grupo)</span></p>
+    <ul class="lst">${row.map(j => `<li><button data-i="${j}"><span>${esc(D.arts[j].a)} ${esc(D.arts[j].t)}</span><span class="n">${fmt(S[i*n+j])} G${G.lab[j] + 1}</span></button></li>`).join('')}</ul>`;
+  if (scroll && innerWidth <= 980) $('#sel').scrollIntoView({behavior: 'smooth', block: 'start'});
+  draw();
+}
+function renderSel() { if (sel != null) select(sel); }
+
+function renderClusters() {
+  $('#cls').innerHTML = G.span.map(([a, b], c) => `<div class="cl${c === selC ? ' on' : ''}"><button data-c="${c}" aria-pressed="${c === selC}">
+    <h3>${esc(gName(c))}<span class="n">${b - a + 1} art.</span></h3>${RES[K] ? `<span class="res">${esc(RES[K][c][1])}</span>` : ''}</button></div>`).join('');
+}
+
+function zoomTo(c) {
+  selC = c; const [a, b] = G.span[c], pad = Math.max(2, Math.round((b - a + 1) * .15));
+  v0 = Math.max(0, a - pad); v1 = Math.min(n, b + 1 + pad);
+  $('#volver').hidden = false; renderClusters(); draw();
+  if (innerWidth <= 980) fig.scrollIntoView({behavior: 'smooth', block: 'start'});
+}
+function fullView() { v0 = 0; v1 = n; selC = null; $('#volver').hidden = true; renderClusters(); draw(); }
+
+function init(d) {
+  D = d; n = d.arts.length; S = Float32Array.from(d.S, v => v / 1000);
+  const o = []; for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) o.push(S[i*n+j]);
+  offs = Float32Array.from(o).sort();
+  buildImage(); v1 = n; setK(12);
+  const ro = new ResizeObserver(() => draw()); ro.observe(fig);
+}
+
+cv.addEventListener('mousemove', e => showTip(cellAt(e)));
+cv.addEventListener('mouseleave', () => { tip.style.display = 'none'; hov = null; draw(); });
+cv.addEventListener('click', e => { const c = cellAt(e); if (c.i != null) { select(c.i, true); if (e.pointerType === 'touch' || matchMedia('(hover: none)').matches) showTip(c); } });
+$('#volver').addEventListener('click', fullView);
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && v1 - v0 < n) fullView(); });
+document.addEventListener('click', e => {
+  const b = e.target.closest('button[data-i],button[data-c]'); if (!b) return;
+  if (b.dataset.c != null) zoomTo(+b.dataset.c);
+  else { const i = +b.dataset.i; if (i < v0 || i >= v1) fullView(); select(i, true); }
+});
+$('#q').addEventListener('change', e => {
+  const q = norm(e.target.value.trim()); if (!q || !D) return;
+  const i = D.arts.findIndex(A => norm(A.a) === q) >= 0 ? D.arts.findIndex(A => norm(A.a) === q) : D.arts.findIndex(A => norm(A.a + ' ' + A.t + ' ' + A.x).includes(q));
+  if (i < 0) { $('#sel').innerHTML = `<h2>Sin resultados</h2><p class="muted">Ningún artículo contiene «${esc(e.target.value)}».</p>`; return; }
+  zoomTo(G.lab[i]); select(i, true);
+});
+const rethemed = () => { if (D) { buildImage(); draw(); } };
+new MutationObserver(rethemed).observe(document.documentElement, {attributes: true, attributeFilter: ['data-theme']});
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', rethemed);
+// los datos vienen de datos_RITP.js (funciona con file://); si faltara, se intenta el JSON, que necesita servidor
+if (window.MATRIZ && window.MATRIZ.RITP) init(window.MATRIZ.RITP);
+else fetch('datos_RITP.json').then(r => r.json()).then(init).catch(() => { $('#err').textContent = 'No se pudieron cargar los datos de la matriz.'; });
+}
+</script>
+<script src="../nav.js"></script>
+</body>
+</html>

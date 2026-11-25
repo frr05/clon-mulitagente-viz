@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bases de Licitación · cinco concesiones</title>
+<link rel="stylesheet" href="tablero.css">
+<link rel="stylesheet" href="nav.css">
+</head>
+<body>
+<!-- Tablero: el mapa de una concesión con su ficha y, abajo, diez gráficos. Todo lo dibuja tablero.js;
+     aquí solo van los contenedores (sus ids son la interfaz con tablero.js y nav.js). -->
+<header class="cab">
+  <div>
+    <h1>¿Cómo están hechas las Bases de Licitación, y qué pasa cuando se modifican?</h1>
+    <p class="sub">Cinco concesiones viales del MOP · <span id="n-art"></span> artículos de las Bases · cada punto es un artículo x.y.z con sus sub-artículos · los cambios sirven para ver cómo reacciona la licitación</p>
+  </div>
+</header>
+
+<nav class="controles" aria-label="Controles">
+  <div class="concs" id="concs" role="group" aria-label="Concesión"></div>
+  <div class="buscar">
+    <input id="buscar" type="search" placeholder="Buscar artículo: 1.8.11, multas, garantía…" autocomplete="off" aria-label="Buscar artículo">
+    <ul id="sugerencias" role="listbox" hidden></ul>
+  </div>
+  <div class="activos" id="activos" aria-live="polite"></div>
+</nav>
+
+<main class="principal">
+  <section class="mapa-caja" id="el-mapa">
+    <div class="mapa-cab">
+      <h2 id="mapa-titulo">El mapa de contenidos</h2>
+      <div class="mapa-tabs">
+        <span class="et-color">Ver:</span><div class="seg chico" id="mapa-vista" role="group" aria-label="Qué muestra el mapa"></div>
+        <span class="et-color">Líneas:</span><div class="seg chico" id="conexiones" role="group" aria-label="Conexiones del mapa"></div>
+        <span class="et-color">Color:</span><div class="seg chico" id="mapa-color" role="group" aria-label="Qué cuenta el color"></div>
+      </div>
+      <p id="mapa-ayuda">Cada punto es un artículo de las Bases. Haz clic en un punto.</p>
+    </div>
+    <div id="mapa" class="mapa"></div>
+  </section>
+  <aside class="ficha" id="ficha" aria-live="polite"></aside>
+</main>
+
+<p class="pista">Todo es clicable: celdas, barras, años y tramos filtran la página o abren el artículo.</p>
+<section class="graficos">
+  <h2 class="seccion" id="licitacion">La licitación <span>· de qué tratan sus Bases, cómo se citan y cuánto se parecen a las otras</span></h2>
+  <div class="g"><div id="g-com"></div><div class="detalle" id="d-com"></div></div>
+  <div class="g"><div id="g-conc"></div><div class="detalle" id="d-conc"></div></div>
+  <div class="g"><div class="seg chico" id="modo-citas" role="group" aria-label="Qué citas contar"></div><div id="g-citas"></div><div class="detalle" id="d-citas"></div></div>
+  <div class="g"><div id="g-plantilla"></div><div class="detalle" id="d-plantilla"></div></div>
+
+  <h2 class="seccion" id="modifica">Qué pasa cuando se modifica <span>· qué artículos cambian, cuándo y si cambian igual en las cinco</span></h2>
+  <div class="g ancho"><div id="g-mod-com"></div><div class="detalle" id="d-mod-com"></div></div>
+  <div class="g"><div id="g-mod-cent"></div><div class="detalle" id="d-mod-cent"></div></div>
+  <div class="g"><div id="g-fases"></div><div class="detalle" id="d-fases"></div></div>
+  <div class="g ancho"><div id="g-anios"></div><div class="detalle" id="d-anios"></div></div>
+
+  <h2 class="seccion" id="antes-despues">Antes y después <span>· Bases originales → vigentes</span></h2>
+  <div class="g"><div id="g-ad-citas"></div><div class="detalle" id="d-ad-citas"></div></div>
+  <div class="g"><div id="g-ad-texto"></div><div class="detalle" id="d-ad-texto"></div></div>
+</section>
+
+<footer class="pie">
+  Fuente: árboles de nodos de <a href="https://frr05.github.io/arbol-de-nodos/" target="_blank" rel="noopener">frr05.github.io/arbol-de-nodos</a> · análisis propio · gráficos con plotagents · <span id="generado"></span>
+</footer>
+
+<script src="tablero_datos.js"></script>
+<script src="antes_despues.js"></script>
+<script src="plotagents.js"></script>
+<script src="tablero.js"></script>
+<script src="nav.js"></script>
+</body>
+</html>
